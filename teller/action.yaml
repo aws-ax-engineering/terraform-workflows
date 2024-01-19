@@ -1,0 +1,49 @@
+# yamllint disable rule:line-length
+---
+name: teller
+
+description: Inject secrets and credential files
+
+inputs:
+
+  teller-version:
+    description: |
+      Must specify version for teller install
+    required: true
+    default: ""
+
+    
+  access_key: 
+    description: access key 
+    required: false
+
+
+  secret_key: 
+    description: secret key 
+    required: false
+
+
+  default_region: 
+    description: default region
+    required: false    
+
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: install teller
+      shell: bash
+      run: |
+        #!/usr/bin/env bash
+        wget https://github.com/tellerops/teller/releases/download/v${{ inputs.teller-version }}/teller_${{ inputs.teller-version }}_Linux_x86_64.tar.gz
+        sudo tar -xvf teller_${{ inputs.teller-version }}_Linux_x86_64.tar.gz
+        sudo mv teller /usr/local/bin/.
+
+    - name: add secrets to env
+      env:
+        AWS_ACCESS_KEY_ID: ${{ inputs.access_key }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.secret_key }}
+        AWS_REGION: ${{ inputs.default_region }}         
+      shell: bash
+      run: eval "$(teller sh)"
